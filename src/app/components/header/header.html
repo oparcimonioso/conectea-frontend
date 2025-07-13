@@ -1,0 +1,46 @@
+<header class="header">
+  <div class="container">
+    <div class="logo">
+      <div class="logo-container">
+        <a routerLink="/">
+          <img
+            src="assets/images/logo/conectea_logo.png" 
+            alt="Conectea Logo" 
+            class="logo-image"
+            width="200"
+            height="100"
+            #logoImage
+          >
+        </a>
+      </div>
+    </div>
+    
+    <nav class="desktop-nav">
+      <ul>
+        <li *ngFor="let item of navItems">
+          <a *ngIf="item.label !== 'Entrar' || !isAuthenticated" [routerLink]="item.path" class="nav-link" [ngClass]="'color-' + item.color">{{ item.label }}</a>
+        </li>
+        <li *ngIf="isAuthenticated">
+          <a (click)="logout()" class="nav-link color-5" style="cursor: pointer;">Sair</a>
+        </li>
+      </ul>
+    </nav>
+    
+    <div class="mobile-menu-toggle" (click)="toggleMobileMenu()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    
+    <nav class="mobile-nav" [class.active]="mobileMenuActive">
+      <ul>
+        <li *ngFor="let item of navItems">
+          <a *ngIf="item.label !== 'Entrar' || !isAuthenticated" [routerLink]="item.path" class="nav-link" [ngClass]="'color-' + item.color" (click)="closeMobileMenu()">{{ item.label }}</a>
+        </li>
+        <li *ngIf="isAuthenticated">
+          <a (click)="logout()" class="nav-link color-5" style="cursor: pointer;">Sair</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>

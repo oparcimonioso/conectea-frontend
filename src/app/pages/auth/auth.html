@@ -1,0 +1,201 @@
+<div class="auth-main-container">
+  <div class="auth-card shadow-lg">
+    <div class="auth-header">
+      <h2>{{ isLoginMode ? 'Entrar' : 'Cadastro' }}</h2>
+      <p *ngIf="isLoginMode">Bem-vindo de volta! Faça login para continuar.</p>
+      <p *ngIf="!isLoginMode">Preencha os dados para criar sua conta.</p>
+    </div>
+
+    <div class="auth-tabs mb-4">
+      <button type="button" [class.active]="isLoginMode" (click)="switchMode()">Entrar</button>
+      <button type="button" [class.active]="!isLoginMode" (click)="switchMode()">Cadastrar</button>
+    </div>
+
+    <div class="card-body px-0">
+      <form *ngIf="isLoginMode" [formGroup]="loginForm" (ngSubmit)="onLogin()" autocomplete="off">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" formControlName="email" class="form-control" [class.is-invalid]="loginForm.get('email')?.invalid && (loginForm.get('email')?.touched || loginFormSubmitted)">
+          <div *ngIf="(loginForm.get('email')?.touched || loginFormSubmitted) && loginForm.get('email')?.invalid" class="invalid-feedback">
+            {{ loginForm.get('email')?.errors?.['required'] ? 'Email obrigatório' : 'Email inválido' }}
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Senha</label>
+          <input type="password" formControlName="password" class="form-control" [class.is-invalid]="loginForm.get('password')?.invalid && (loginForm.get('password')?.touched || loginFormSubmitted)">
+          <div *ngIf="(loginForm.get('password')?.touched || loginFormSubmitted) && loginForm.get('password')?.invalid" class="invalid-feedback">
+            Senha obrigatória
+          </div>
+        </div>
+        <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+        <div class="d-flex flex-column gap-2 mt-4">
+          <button type="submit" class="btn btn-primary" [disabled]="loading">
+            <span *ngIf="loading" class="spinner-border spinner-border-sm"></span> Entrar
+          </button>
+        </div>
+      </form>
+
+      <form *ngIf="!isLoginMode" [formGroup]="signupForm" (ngSubmit)="onSignup()" autocomplete="off">
+        <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+        <div *ngIf="cadastroSucesso" class="alert alert-success">
+          Cadastro realizado com sucesso! Agora você pode entrar na aba "Entrar".
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Nome*</label>
+              <input type="text" formControlName="nome" class="form-control" [class.is-invalid]="signupForm.get('nome')?.invalid && (signupForm.get('nome')?.touched || signupFormSubmitted)">
+              <div *ngIf="(signupForm.get('nome')?.touched || signupFormSubmitted) && signupForm.get('nome')?.invalid" class="invalid-feedback">
+                Nome obrigatório
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Sobrenome*</label>
+              <input type="text" formControlName="sobrenome" class="form-control" [class.is-invalid]="signupForm.get('sobrenome')?.invalid && (signupForm.get('sobrenome')?.touched || signupFormSubmitted)">
+              <div *ngIf="(signupForm.get('sobrenome')?.touched || signupFormSubmitted) && signupForm.get('sobrenome')?.invalid" class="invalid-feedback">
+                Sobrenome obrigatório
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Data de Nascimento*</label>
+          <input type="date" formControlName="dataNascimento" class="form-control" (change)="onBirthDateChange()" [class.is-invalid]="signupForm.get('dataNascimento')?.invalid && (signupForm.get('dataNascimento')?.touched || signupFormSubmitted)">
+          <div *ngIf="(signupForm.get('dataNascimento')?.touched || signupFormSubmitted) && signupForm.get('dataNascimento')?.invalid" class="invalid-feedback">
+            Data de nascimento obrigatória
+          </div>
+          <div *ngIf="menorDeIdade" class="invalid-feedback d-block">Você precisa ter 18 anos ou mais para se cadastrar.</div>
+        </div>
+        
+        <div class="form-group">
+          <label>CEP*</label>
+          <input type="text" formControlName="cep" class="form-control" (blur)="buscarCep()" maxlength="9" [class.is-invalid]="signupForm.get('cep')?.invalid && (signupForm.get('cep')?.touched || signupFormSubmitted)">
+          <div *ngIf="(signupForm.get('cep')?.touched || signupFormSubmitted) && signupForm.get('cep')?.invalid" class="invalid-feedback">
+            {{ signupForm.get('cep')?.errors?.['required'] ? 'CEP obrigatório' : 'Formato inválido (00000-000)' }}
+          </div>
+        </div>
+        
+        <div class="row">
+          <div class="col-md-8">
+            <div class="form-group">
+              <label>Rua*</label>
+              <input type="text" formControlName="rua" class="form-control" [class.is-invalid]="signupForm.get('rua')?.invalid && (signupForm.get('rua')?.touched || signupFormSubmitted)">
+              <div *ngIf="(signupForm.get('rua')?.touched || signupFormSubmitted) && signupForm.get('rua')?.invalid" class="invalid-feedback">
+                Rua obrigatória
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-group">
+              <label>Número*</label>
+              <input type="text" formControlName="numero" class="form-control" [class.is-invalid]="signupForm.get('numero')?.invalid && (signupForm.get('numero')?.touched || signupFormSubmitted)">
+              <div *ngIf="(signupForm.get('numero')?.touched || signupFormSubmitted) && signupForm.get('numero')?.invalid" class="invalid-feedback">
+                Número obrigatório
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Bairro*</label>
+              <input type="text" formControlName="bairro" class="form-control" [class.is-invalid]="signupForm.get('bairro')?.invalid && (signupForm.get('bairro')?.touched || signupFormSubmitted)">
+              <div *ngIf="(signupForm.get('bairro')?.touched || signupFormSubmitted) && signupForm.get('bairro')?.invalid" class="invalid-feedback">
+                Bairro obrigatório
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-group">
+              <label>Cidade*</label>
+              <input type="text" formControlName="cidade" class="form-control" [class.is-invalid]="signupForm.get('cidade')?.invalid && (signupForm.get('cidade')?.touched || signupFormSubmitted)">
+              <div *ngIf="(signupForm.get('cidade')?.touched || signupFormSubmitted) && signupForm.get('cidade')?.invalid" class="invalid-feedback">
+                Cidade obrigatória
+              </div>
+            </div>
+          </div>
+          <div class="col-md-2">
+            <div class="form-group">
+              <label>Estado*</label>
+              <input type="text" formControlName="estado" class="form-control" [class.is-invalid]="signupForm.get('estado')?.invalid && (signupForm.get('estado')?.touched || signupFormSubmitted)">
+              <div *ngIf="(signupForm.get('estado')?.touched || signupFormSubmitted) && signupForm.get('estado')?.invalid" class="invalid-feedback">
+                Estado obrigatório (2 letras)
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group tea-area">
+          <label>Criança ou Adolescente com TEA</label>
+          <div class="tea-labels g-2 align-items-center mb-2">
+            <div class="col"><small class="form-text text-muted">Escolha uma opção</small></div>
+            <div class="col"><small class="form-text text-muted">Idade</small></div>
+          </div>
+          <div *ngFor="let crianca of criancasTEA; let i = index" class="row tea-row g-2 align-items-center mb-3">
+            <div class="col">
+              <select [(ngModel)]="crianca.tipo" [ngModelOptions]="{standalone: true}" name="tipoTEA{{i}}" (ngModelChange)="onTipoTEAChange(i)" class="form-control">
+                <option value="crianca">Criança com TEA</option>
+                <option value="adolescente">Adolescente com TEA</option>
+              </select>
+            </div>
+            <div class="col">
+              <select [(ngModel)]="crianca.idade" [ngModelOptions]="{standalone: true}" name="idadeTEA{{i}}" class="form-control">
+                <option *ngFor="let idade of getIdadesTEA(crianca.tipo)" [value]="idade">{{ idade }}</option>
+              </select>
+            </div>
+            <div class="col-auto d-flex gap-1">
+              <button type="button" class="btn btn-danger btn-sm" (click)="removerCriancaTEA(i)" *ngIf="criancasTEA.length > 1">-</button>
+              <button type="button" class="btn btn-secondary btn-plus" (click)="adicionarCriancaTEA()" *ngIf="i === criancasTEA.length - 1 && criancasTEA.length < 4">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Email*</label>
+              <input type="email" formControlName="email" class="form-control" [class.is-invalid]="signupForm.get('email')?.invalid && (signupForm.get('email')?.touched || signupFormSubmitted)">
+              <div *ngIf="(signupForm.get('email')?.touched || signupFormSubmitted) && signupForm.get('email')?.invalid" class="invalid-feedback">
+                {{ signupForm.get('email')?.errors?.['required'] ? 'Email obrigatório' : 'Email inválido' }}
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Senha*</label>
+              <input type="password" formControlName="password" class="form-control" [class.is-invalid]="signupForm.get('password')?.invalid && (signupForm.get('password')?.touched || signupFormSubmitted)">
+              <div *ngIf="(signupForm.get('password')?.touched || signupFormSubmitted) && signupForm.get('password')?.invalid" class="invalid-feedback">
+                {{ signupForm.get('password')?.errors?.['required'] ? 'Senha obrigatória' : 'Mínimo de 6 caracteres' }}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Confirmar Senha*</label>
+          <input type="password" formControlName="confirmPassword" class="form-control" [class.is-invalid]="signupForm.errors?.['mismatch'] && (signupForm.get('confirmPassword')?.touched || signupFormSubmitted)">
+          <div *ngIf="signupForm.errors?.['mismatch'] && (signupForm.get('confirmPassword')?.touched || signupFormSubmitted)" class="invalid-feedback">
+            Senhas não coincidem
+          </div>
+        </div>
+        
+        <div class="d-flex flex-column gap-2 mt-4">
+          <button type="submit" class="btn btn-primary" [disabled]="loading">
+            <span *ngIf="loading" class="spinner-border spinner-border-sm"></span> Cadastrar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="auth-info-card shadow-lg">
+    <h3>Por que criar uma conta?</h3>
+    <p>Criando uma conta, você poderá avaliar instituições, compartilhar experiências e ajudar outras famílias. Além disso, terá acesso à busca de instituições próximas ao seu endereço.</p>
+    <ul><li>Avalie instituições e ajude a comunidade</li><li>Encontre escolas próximas</li><li>Salve suas favoritas</li></ul>
+  </div>
+</div>

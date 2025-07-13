@@ -1,0 +1,113 @@
+<div class="units-title">
+  <h1>Encontre uma escola</h1>
+</div>
+
+<div class="search-bar">
+  <mat-form-field appearance="outline">
+    <mat-label>Buscar por CEP</mat-label>
+    <input matInput placeholder="Ex: 12345-678" [(ngModel)]="cep" #cepInput>
+    <button mat-icon-button matSuffix (click)="searchByCep()">
+      <mat-icon>search</mat-icon>
+    </button>
+  </mat-form-field>
+</div>
+
+<div class="units-container">
+  <div class="map-and-details-wrapper">
+    <div id="map"></div>
+
+    <div class="institution-details" *ngIf="showDetails && selectedInstitution">
+      <button mat-icon-button class="close-button" (click)="closeDetails()">
+        <mat-icon>close</mat-icon>
+      </button>
+
+      <div class="institution-header">
+        <img src="assets/images/escola-recife.png" 
+             alt="{{ selectedInstitution.nome }}" 
+             class="institution-image">
+        <h2>{{ selectedInstitution.nome }}</h2>
+        <p class="address">{{ selectedInstitution.endereco }}</p>
+
+        <div class="rating-summary">
+          <div class="stars">
+            <mat-icon *ngFor="let star of counter(5); let i = index">
+              {{ (selectedInstitution.reviews | averageRating) >= i+1 ? 'star' : 
+                 (selectedInstitution.reviews | averageRating) > i ? 'star_half' : 'star_border' }}
+            </mat-icon>
+          </div>
+          <span class="rating-value">
+            {{ (selectedInstitution.reviews | averageRating) | number:'1.1-1' }} 
+            ({{ selectedInstitution.reviews.length }} avaliações)
+          </span>
+        </div>
+      </div>
+
+      <div class="institution-info">
+        <h3>Sobre</h3>
+        <p>{{ selectedInstitution.descricao }}</p>
+
+        <h3>Telefone</h3>
+        <p>{{ selectedInstitution.telefone }}</p>
+      </div>
+
+      <div class="reviews-section">
+        <h3>Avaliações</h3>
+
+        <div class="review" *ngFor="let review of selectedInstitution.reviews">
+          <div class="review-header">
+            <div class="user-info">
+              <span class="user-name">{{ review.userName }}</span>
+              <span class="review-date">{{ review.date | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="review-rating">
+              <mat-icon *ngFor="let star of counter(5); let i = index">
+                {{ i < review.rating ? 'star' : 'star_border' }}
+              </mat-icon>
+            </div>
+            <div class="review-actions">
+              <button mat-icon-button 
+                      *ngIf="canDeleteReview(review)"
+                      (click)="deleteReview(review.id)"
+                      style="color: #f44336;">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+          <p class="review-comment">{{ review.comment }}</p>
+        </div>
+
+        <div class="add-review-section">
+          <h3>Deixe sua avaliação</h3>
+
+          <div *ngIf="!isLoggedIn" class="login-prompt">
+            <p>Quer dar sua opinião sobre essa instituição? <a (click)="navigateToLogin()">Faça login</a>.</p>
+          </div>
+
+          <div *ngIf="isLoggedIn" class="review-form">
+            <div class="rating-input">
+              <label>Sua classificação:</label>
+              <div class="stars">
+                <mat-icon *ngFor="let star of counter(5); let i = index" 
+                          (click)="setRating(i+1)"
+                          [class.active]="i < newRating">
+                  {{ i < newRating ? 'star' : 'star_border' }}
+                </mat-icon>
+              </div>
+            </div>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Seu comentário</mat-label>
+              <textarea matInput [(ngModel)]="newComment" rows="3"></textarea>
+            </mat-form-field>
+
+            <button mat-raised-button color="primary" 
+                    (click)="submitReview()"
+                    [disabled]="!newComment.trim() || newRating === 0">
+              Enviar avaliação
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

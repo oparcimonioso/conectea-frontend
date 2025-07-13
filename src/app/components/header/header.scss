@@ -1,0 +1,290 @@
+$primary: #391BA6;
+$secondary: #0B8CBF;
+$accent1: #7CBF17;
+$accent2: #F2BB13;
+$accent3: #F22222;
+$text-dark: #333333;
+$text-light: #FFFFFF;
+$white: #FFFFFF;
+
+.header {
+  background-color: $white;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  
+  .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    
+    .logo-container {
+      position: relative;
+      height: auto;
+      width: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      .logo-image {
+        height: auto;
+        max-height: 48px;
+        width: auto;
+        max-width: 160px;
+        display: block;
+      }
+    }
+    
+    .logo-text {
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-decoration: none;
+      
+      background: linear-gradient(
+        135deg,
+        #391BA6 0%,
+        #0B8CBF 30%,
+        #7CBF17 65%,
+        #F2BB13 100%
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      
+      background-size: 200% 200%;
+      animation: gradientFlow 6s ease infinite;
+      
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      
+      &:hover {
+        animation: gradientFlowHover 3s ease infinite;
+      }
+    }
+  }
+  
+  .desktop-nav {
+    ul {
+      display: flex;
+      list-style: none;
+      gap: 15px;
+      
+      li {
+        .nav-link {
+          padding: 8px 15px;
+          border-radius: 20px;
+          font-weight: 500;
+          transition: all 0.3s ease;
+          text-decoration: none;
+          display: inline-block;
+          
+          &.color-1 {
+            background-color: rgba($primary, 0.1);
+            color: $primary;
+            
+            &:hover {
+              background-color: $primary;
+              color: $white;
+            }
+          }
+          
+          &.color-2 {
+            background-color: rgba($secondary, 0.1);
+            color: $secondary;
+            
+            &:hover {
+              background-color: $secondary;
+              color: $white;
+            }
+          }
+          
+          &.color-3 {
+            background-color: rgba($accent1, 0.1);
+            color: $accent1;
+            
+            &:hover {
+              background-color: $accent1;
+              color: $white;
+            }
+          }
+          
+          &.color-4 {
+            background-color: rgba($accent2, 0.1);
+            color: $accent2;
+            
+            &:hover {
+              background-color: $accent2;
+              color: $white;
+            }
+          }
+          
+          &.color-5 {
+            background-color: rgba($accent3, 0.1);
+            color: $accent3;
+            
+            &:hover {
+              background-color: $accent3;
+              color: $white;
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  .mobile-menu-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 30px;
+    height: 24px;
+    cursor: pointer;
+    z-index: 1001;
+    
+    span {
+      display: block;
+      height: 3px;
+      width: 100%;
+      background-color: $primary;
+      border-radius: 3px;
+      transition: all 0.3s ease;
+      transform-origin: left center;
+    }
+  }
+  
+  .mobile-nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: $white;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+    z-index: 999;
+    
+    &.active {
+      display: block;
+    }
+    
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      
+      li {
+        border-bottom: 1px solid #eee;
+        
+        &:last-child {
+          border-bottom: none;
+        }
+        
+        .nav-link {
+          display: block;
+          padding: 15px 20px;
+          text-decoration: none;
+          font-weight: 500;
+          transition: background-color 0.3s;
+          
+          &.color-1 {
+            background-color: rgba($primary, 0.1);
+            color: $primary;
+          }
+          
+          &.color-2 {
+            background-color: rgba($secondary, 0.1);
+            color: $secondary;
+          }
+          
+          &.color-3 {
+            background-color: rgba($accent1, 0.1);
+            color: $accent1;
+          }
+          
+          &.color-4 {
+            background-color: rgba($accent2, 0.1);
+            color: $accent2;
+          }
+          
+          &.color-5 {
+            background-color: rgba($accent3, 0.1);
+            color: $accent3;
+          }
+          
+          &:hover {
+            background-color: #f5f5f5;
+          }
+        }
+      }
+    }
+  }
+
+  .mobile-menu-toggle.active {
+    span:nth-child(1) {
+      transform: rotate(45deg) translate(2px, -1px);
+    }
+    
+    span:nth-child(2) {
+      opacity: 0;
+    }
+    
+    span:nth-child(3) {
+      transform: rotate(-45deg) translate(1px, 1px);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .desktop-nav {
+      display: none;
+    }
+    
+    .mobile-menu-toggle {
+      display: flex;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .logo {
+      .logo-text {
+        font-size: 1.2rem;
+      }
+      
+      .logo-container {
+        max-width: 110px;
+      }
+    }
+  }
+}
+
+@keyframes gradientFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes gradientFlowHover {
+  0% {
+    background-position: 100% 50%;
+  }
+  50% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
