@@ -1,18 +1,18 @@
 import {
   Component,
-  Inject,
   PLATFORM_ID,
   AfterViewInit,
   OnDestroy,
   ViewChild,
-  ElementRef
+  ElementRef,
+  Inject
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -34,7 +34,8 @@ import { AverageRatingPipe } from '../../pipes/average-rating.pipe';
     MatInputModule,
     MatIconModule,
     MatButtonModule,
-    AverageRatingPipe
+    AverageRatingPipe,
+    RouterModule
   ],
   templateUrl: './units.html',
   styleUrls: ['./units.scss']
@@ -55,15 +56,15 @@ export class UnitsComponent implements AfterViewInit, OnDestroy {
   private L: any;
   private openDetailsListener!: EventListener;
 
-  @ViewChild('cepInput') cepInput!: ElementRef;
+  @ViewChild('cepInput', { static: false }) cepInput!: ElementRef;
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
-    private router: Router,
+    @Inject(Router) private router: Router,
     private institutionService: InstitutionService,
     private reviewService: ReviewService,
     private authService: AuthService,
-    private snackBar: MatSnackBar
+    @Inject(MatSnackBar) private snackBar: MatSnackBar
   ) {}
 
   ngAfterViewInit(): void {
@@ -80,15 +81,20 @@ export class UnitsComponent implements AfterViewInit, OnDestroy {
         window.addEventListener('openDetails', this.openDetailsListener);
 
         setTimeout(() => {
-          this.cepInput.nativeElement.focus();
+          if (this.cepInput) {
+            this.cepInput.nativeElement.focus();
+          }
           this.searchByCep();
         }, 500);
+
       }).catch(err => console.error('Erro ao carregar Leaflet:', err));
     }
   }
 
   ngOnDestroy(): void {
-    window.removeEventListener('openDetails', this.openDetailsListener);
+    if (isPlatformBrowser(this.platformId) && this.openDetailsListener) {
+      window.removeEventListener('openDetails', this.openDetailsListener);
+    }
   }
 
   private initMap(): void {
@@ -134,14 +140,12 @@ export class UnitsComponent implements AfterViewInit, OnDestroy {
       const popupHtml = `
         <strong>${inst.nome}</strong><br>
         ${inst.endereco}<br>
-        <img src="assets/images/escola-recife.png" width="80" height="60" 
+        <img src="assets/images/escola-recife.png" width="80" height="60"
              style="border-radius:5px; margin:5px 0;"><br>
         <em>${stars}</em><br>
-        <button onclick="window.dispatchEvent(
-          new CustomEvent('openDetails',{ detail: ${inst.id} })
-        )">Mais detalhes</button>
+        <button onclick="window.dispatchEvent(new CustomEvent('openDetails',{ detail: ${inst.id} }))">Mais detalhes</button>
       `;
-      
+
       this.L.marker([inst.latitude, inst.longitude], { icon: customIcon })
         .addTo(this.map)
         .bindPopup(popupHtml);
@@ -159,37 +163,27 @@ export class UnitsComponent implements AfterViewInit, OnDestroy {
     this.centerMap(coords[0], coords[1]);
   }
 
-
   private centerMap(lat: number, lng: number): void {
     if (!this.map || !this.L) return;
-    
     this.map.setView([lat, lng], 13);
-    
   }
 
-openDetails(id: number): void {
+  openDetails(id: number): void {
     this.institutionService.getInstitutionById(id).subscribe({
       next: (institution) => {
         this.selectedInstitution = institution;
         this.showDetails = true;
         this.isLoggedIn = this.authService.isAuthenticated();
-        
-
         this.currentUser = this.authService.getCurrentUser();
-        
-
-        console.log('Usuário atual:', this.currentUser);
-        console.log('Avaliações:', this.selectedInstitution.reviews);
       },
-
-    error: (err) => {
-      console.error('Erro ao buscar detalhes da instituição', err);
-      this.snackBar.open('Erro ao carregar detalhes da instituição', 'Fechar', {
-        duration: 3000
-      });
-    }
-  });
-}
+      error: (err) => {
+        console.error('Erro ao buscar detalhes da instituição', err);
+        this.snackBar.open('Erro ao carregar detalhes da instituição', 'Fechar', {
+          duration: 3000
+        });
+      }
+    });
+  }
 
   closeDetails(): void {
     this.showDetails = false;
@@ -213,38 +207,24 @@ openDetails(id: number): void {
       });
       return;
     }
-    
     if (!this.authService.isAuthenticated()) {
       this.router.navigate(['/entrar'], {
         queryParams: { returnUrl: '/unidades' }
       });
       return;
     }
-    
     if (this.selectedInstitution) {
-      const reviewData = {
-        rating: this.newRating,
-        comment: this.newComment
-      };
-
+      const reviewData = { rating: this.newRating, comment: this.newComment };
       this.reviewService.createReview(this.selectedInstitution.id, reviewData).subscribe({
         next: () => {
-          this.snackBar.open('Avaliação enviada com sucesso!', 'Fechar', {
-            duration: 3000
-          });
-          
-
+          this.snackBar.open('Avaliação enviada com sucesso!', 'Fechar', { duration: 3000 });
           this.openDetails(this.selectedInstitution.id);
-          
-
           this.newComment = '';
           this.newRating = 0;
         },
         error: (err) => {
           console.error('Erro ao enviar avaliação', err);
-          this.snackBar.open('Erro ao enviar avaliação. Tente novamente.', 'Fechar', {
-            duration: 3000
-          });
+          this.snackBar.open('Erro ao enviar avaliação. Tente novamente.', 'Fechar', { duration: 3000 });
         }
       });
     }
@@ -256,44 +236,29 @@ openDetails(id: number): void {
     });
   }
 
-
   canDeleteReview(review: any): boolean {
     if (!this.isLoggedIn || !this.currentUser) return false;
-    
-
     if (this.currentUser.isAdmin) return true;
-    
-
     return review.userId === this.currentUser.id;
   }
 
-
   deleteReview(reviewId: number): void {
-  if (!this.selectedInstitution) return;
-
-  if (confirm('Tem certeza que deseja excluir esta avaliação?')) {
-    this.reviewService.deleteReview(reviewId).subscribe({
-      next: (response) => {
-        const message = response || 'Avaliação excluída com sucesso!';
-        this.snackBar.open(message, 'Fechar', {
-          duration: 3000
-        });
-        
-        const index = this.selectedInstitution.reviews.findIndex(
-          (r: any) => r.id === reviewId
-        );
-        
-        if (index !== -1) {
-          this.selectedInstitution.reviews.splice(index, 1);
+    if (!this.selectedInstitution) return;
+    if (confirm('Tem certeza que deseja excluir esta avaliação?')) {
+      this.reviewService.deleteReview(reviewId).subscribe({
+        next: (response) => {
+          const message = response || 'Avaliação excluída com sucesso!';
+          this.snackBar.open(message, 'Fechar', { duration: 3000 });
+          const index = this.selectedInstitution.reviews.findIndex((r: any) => r.id === reviewId);
+          if (index !== -1) {
+            this.selectedInstitution.reviews.splice(index, 1);
+          }
+        },
+        error: (err) => {
+          console.error('Erro ao excluir avaliação', err);
+          this.snackBar.open('Erro ao excluir avaliação', 'Fechar', { duration: 3000 });
         }
-      },
-      error: (err) => {
-        console.error('Erro ao excluir avaliação', err);
-        this.snackBar.open('Erro ao excluir avaliação', 'Fechar', {
-          duration: 3000
-        });
-      }
-    });
+      });
+    }
   }
-}
 }

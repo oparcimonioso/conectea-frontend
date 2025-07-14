@@ -2,14 +2,13 @@ import 'zone.js';
 
 import { importProvidersFrom } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { provideRouter, withHashLocation } from '@angular/router';
+import { provideRouter } from '@angular/router';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { appConfig } from './app/app.config';
-
-import { App } from './app/app';
-import { routes } from './app/app.routes';
+import { provideHttpClient, withFetch, HTTP_INTERCEPTORS } from '@angular/common/http'; // Atualizado com withFetch
 import { TokenInterceptor } from './app/interceptors/token.interceptor';
+import { AppComponent } from './app/app'; // Importe AppComponent diretamente
+
+import { routes } from './app/app.routes'; // Importe as rotas
 
 import * as L from 'leaflet';
 
@@ -19,15 +18,13 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'assets/marker-shadow.png'
 });
 
-bootstrapApplication(App, {
+bootstrapApplication(AppComponent, {
   providers: [
-    provideRouter(routes, withHashLocation()),
-
+    provideRouter(routes),
+    provideHttpClient(withFetch()), // Usando withFetch para HttpClient
     importProvidersFrom(
-      HttpClientModule,
       BrowserAnimationsModule
     ),
-
     { 
       provide: HTTP_INTERCEPTORS, 
       useClass: TokenInterceptor, 

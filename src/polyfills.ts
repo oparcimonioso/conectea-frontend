@@ -1,2 +1,4 @@
 import 'zone.js';
-(window as any).global = window;
+if (typeof window !== 'undefined') {
+  (window as any).global = window;
+}

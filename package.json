@@ -7,7 +7,12 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:conectea-frontend": "node dist/conectea-frontend/server/server.mjs"
+    "serve:ssr:conectea-frontend": "node dist/conectea-frontend/server/server.mjs",
+    "lint": "ng lint",
+    "dev:ssr": "ng run conectea-frontend:serve-ssr",
+    "serve:ssr": "node dist/conectea-frontend/server/main.js",
+    "build:ssr": "ng build && ng run conectea-frontend:server",
+    "prerender": "ng run conectea-frontend:prerender"
   },
   "private": true,
   "dependencies": {
@@ -39,7 +44,7 @@
     "@angular/build": "^20.0.2",
     "@angular/cli": "^20.0.2",
     "@angular/compiler-cli": "^20.0.0",
-    "@types/express": "^5.0.1",
+    "@types/express": "^5.0.3",
     "@types/jasmine": "~5.1.0",
     "@types/leaflet": "^1.9.19",
     "@types/node": "^20.17.19",
